@@ -1,0 +1,45 @@
+{% load static %}
+<style>
+    *{
+        font-family:"Helvetica";
+        color: black;
+        
+        background-color: #e8e8e8;
+    }
+    a{
+        text-decoration: none;
+        font-weight: bold;
+        color: #1DA1F2;
+        
+        background-color: #ffffff;
+    }
+    #logo{
+        width:5vw;
+        margin: 5vh;
+    }
+    p{
+        margin: 2em 4em;
+        text-align: center;
+        background-color: #ffffff;
+    }
+    .logout{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width:38vw;
+        margin: 10vh auto;
+        padding: 4vh 0 4vh 0;
+        
+        background-color: #ffffff;
+        border-radius: 1.3rem;
+    }
+</style>
+{% block content %}
+    <div>
+        <div class='logout'>
+            <img src="/static/images/12-layes-outline.apng" id="logo">
+            <p>{{html}}</p>
+            <a href={{url}}>Signup</a>
+        </div>
+    </div>
+{% endblock %}

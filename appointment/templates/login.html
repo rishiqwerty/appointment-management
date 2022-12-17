@@ -1,0 +1,91 @@
+<style>
+    *{
+        font-family:"Helvetica";
+        color: black;
+    }
+    .login-content{
+        width:38vw;
+        margin: 10vh auto;
+        background-color: #ffffff;
+        padding: 2vh 0 2vh 0;
+        border-radius: 1.3rem;
+    }
+    #logo{
+        width:5vw;
+    }
+    a{
+        text-decoration: none;
+    }
+    h3{
+        margin-top: 2vh;
+        font-weight: bolder;
+    }
+    form{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        row-gap: 20px;
+        
+    }
+    input{
+        margin-top: 5vh;
+        width: 100%;
+        height:50px;
+        color: rgb(101, 101, 101);
+        /* border:none; */
+        border-radius: 0.2rem;
+    }
+    #submit{
+        padding: 0 15vw;
+        background-color: #f2921d;
+        color: white;
+    }
+    
+    p input{
+        border: none;
+        border-radius: 1.5rem;
+        margin-top: 18vh;
+    }
+    .login-form{
+        display: flex;
+        justify-content: center;
+        
+    }
+    p{
+        color: black;
+    }
+    *{
+        text-align: center;
+    }
+    span{
+        color: Red;
+    }
+</style>
+
+   
+   
+   <div>
+
+        {% block content %}
+            <div class="login-content">
+                <img src="/static/images/12-layes-outline.apng" id="logo">
+                <h3>Sign-in</h3>
+                
+                <div class="login-form">
+                    
+                
+                    <form action="{% url 'login' %}" method="post">
+                        {% csrf_token %}
+                        {{form}}
+                        <span>{{ error }}</span>
+                        <p><input type="submit" value="Log-in" id="submit"></p>
+                        <p>Don't have an account?<a href="../register/">  Sign up</a></p>
+                        
+                    </form>
+                    
+                </div>
+                
+            </div>
+        {% endblock %}
+    </div>
+</html>

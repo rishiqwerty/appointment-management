@@ -1,0 +1,121 @@
+<style>
+    *{
+        font-family:"Helvetica";
+        color: black;
+    }
+    .appointment-create{
+        width:38vw;
+        margin: 0 auto 10vh auto;
+        background-color: #ffffff;
+        padding: 2vh 0 2vh 0;
+        border-radius: 1.3rem;
+    }
+    #logo{
+        width:5vw;
+    }
+    a{
+        text-decoration: none;
+        color: orange;
+    }
+    h3{
+        margin-top: 2vh;
+        font-weight: bolder;
+    }
+    form{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        row-gap: 20px;
+        
+    }
+    input, select{
+        margin-top: 2vh;
+        width: 100%;
+        height:50px;
+        color: rgb(101, 101, 101);
+        /* border:none; */
+        border-radius: 0.2rem;
+    }
+    #submit{
+        padding: 0 15vw;
+        background-color: #f2921d;
+        color: white;
+    }
+    
+    p input{
+        border: none;
+        border-radius: 1.5rem;
+        margin-top: 18vh;
+    }
+    .appointment-form{
+        display: flex;
+        justify-content: center;
+        
+    }
+    p{
+        color: black;
+    }
+    *{
+        text-align: center;
+    }
+    span{
+        color: Red;
+    }
+    ul.errorlist{
+        display: none;
+    }
+    .header{
+        display: flex;
+        justify-content: space-between;
+        column-gap: 5vw;
+    }
+    #logout{
+        padding: 1vh 2vw;
+        margin: auto 1vh;
+        display: flex;
+        align-items: center;
+        background-color: #f2921d;
+        color: white;
+        border-radius: 1.5rem;
+    }
+    .nav{
+        display: flex;
+        background-color: #f7ede1;
+        justify-content: space-between;
+        padding: 0 10px;
+    }
+    .nav nav{
+        display: flex;
+        column-gap: 10px;
+        align-items: center;
+    }
+</style>
+
+{% block content %}
+    <div class="appointment-create">
+        <div class="nav">
+            <nav>
+                <a href={% url 'get-appoint' %}>Appointments</a>
+                <a href={% url 'appoint' %}>Create appointments</a>
+            </nav>
+            <p>Hi, {{user_type}}</p>
+        </div>
+        <img src="/static/images/12-layes-outline.apng" id="logo">
+        <div class="header"><h3>Book an appointment</h3><a id="logout" type="button" href="../logout">logout</a></div>
+        
+        <div class="appointment-form">
+            
+        
+            <form action="{% url 'appoint' %}" method="post">
+                {% csrf_token %}
+                {{form}}
+                <span>{{ error }}</span>
+                <p><input type="submit" value="Create appointment" id="submit"></p>
+                <p>Create new account?<a href="../register/">  Sign up</a></p>
+                
+            </form>
+            
+        </div>
+        
+    </div>
+{% endblock %}
