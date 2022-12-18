@@ -33,18 +33,18 @@ Note: make sure you're running this from django project directory, where manage.
 - Now if you visit: http://localhost:8000/
   
   Login page will show up:
-![login](readme_images\Screenshot2022-12-18.png)
+![login](readme_images/Screenshot2022-12-18.png)
 
     From here you can click on Signup to create new account.
- ![signup](readme_images\signup.png)
+ ![signup](readme_images/signup.png)
     Here while signingup we can select the user type(Admin,Patient,Doctor) all having different write acces.
 
-    ![create](readme_images\appoint-create.png)
+    ![create](readme_images/appoint-create.png)
     After Signup Appointment creation page will open depending on user, Doctor does'nt have the option to Create an appointment. Although he can edit it.
 
     Next we have all appointments page where we can find all the appointments which the logged in user have, patient and doctor can only access appointment of which they are associated with.
     
-    ![all](readme_images\all-appoint.png)
+    ![all](readme_images/all-appoint.png)
 
     Here we also have the option to delete or make changes to the appointment. For past appointments there is no option for editting or deleting them.
 
@@ -66,4 +66,4 @@ Note: make sure you're running this from django project directory, where manage.
   - Patient, Doctor for storing their info. UserData foreign key
   - Appointment is the table which contains appointment details like, Date,time of appointment, reason, patient, doctor ids.
 
-![arch](readme_images\arch.png)
+![arch](readme_images/arch.png)
