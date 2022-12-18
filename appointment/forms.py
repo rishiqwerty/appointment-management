@@ -2,12 +2,11 @@ from datetime import datetime, timedelta, time
 from django import forms
 from appointment.models import UserData
 from appointment.models import Doctor, Patient
-# from bootstrap_datepicker_plus import DatePickerInput
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from appointment.models import Appointment
+from appointment.models import Appointment, MedicalReport
 HOUR_CHOICES = []
-for x in range(9, 17):
+for x in range(9, 18):
     if x==13:
         continue
     HOUR_CHOICES.append((time(hour=x), '{:02d}:00 '.format(x) + '- {:02d}:00'.format(x+1) ))
@@ -32,8 +31,6 @@ def week_dates():
     return week_dates
 class SignUpForm(UserCreationForm):
     user_type = forms.ChoiceField(choices=(('DOCTOR', 'Doctor'), ('PATIENT','Patient'),('ADMIN', 'Admin')))
-    # name = forms.CharField(max_length=100, required=True, help_text='Your Name Plz!!')
-
     class Meta:
         model = User
         fields = ('username', 'password1', 'password2', 'first_name', 'last_name')
@@ -45,8 +42,6 @@ class LoginForm(forms.Form):
 
 
 class AppointmentForm(forms.ModelForm):
-    '''
-    '''
 
     appointment_date = forms.ChoiceField(choices=week_dates())
     appointment_time = forms.ChoiceField(choices=HOUR_CHOICES)
@@ -59,14 +54,13 @@ class AppointmentForm(forms.ModelForm):
                     'appointment_time':forms.Select(choices=HOUR_CHOICES),
                 }
    
-    def save(self, doc, commit=True):
-        self.cleaned_data['doctorID'] = doc.id
+    def clean_doctorID(self):
+        doc = User.objects.get(id=self.cleaned_data['doctorID'])
+        return doc
         
-        return super().save(commit)
+        # return super().save(commit)
 
 class AppointmentAdminForm(forms.ModelForm):
-    '''
-    '''
 
     appointment_date = forms.ChoiceField(choices=week_dates())
     appointment_time = forms.ChoiceField(choices=HOUR_CHOICES)
@@ -80,7 +74,50 @@ class AppointmentAdminForm(forms.ModelForm):
                     'appointment_time':forms.Select(choices=HOUR_CHOICES),
                 }
    
-    def save(self, doc, commit=True):
-        self.cleaned_data['doctorID'] = doc.id
+    def clean_doctorID(self):
+        doc = User.objects.get(id=self.cleaned_data['doctorID'])
+        return doc
+    
+    def clean_patientID(self):
+        doc = User.objects.get(id=self.cleaned_data['patientID'])
+        return doc
         
-        return super().save(commit)
+
+class MedicalReportForm(forms.ModelForm):
+    prescription = forms.CharField(max_length=1000)
+    test_requested = forms.CharField()
+    test_results = forms.CharField()
+    
+    class Meta:
+        model = MedicalReport
+        fields = [
+            'prescription',
+            'test_requested',
+            'test_results'
+        ]
+
+class UserForm(forms.Form):
+    location = forms.CharField()
+    age = forms.CharField()
+    blood_group = forms.CharField()
+    
+    class Meta:
+        fields = [
+            'age',
+            'blood_group'
+            'location'
+        ]
+
+class DoctorForm(forms.Form):
+    specialist = forms.CharField()
+    experience = forms.IntegerField()
+    bio = forms.CharField()
+    location = forms.CharField()
+
+    class Meta:
+        fields = [
+            'specialist',
+            'experience',
+            'bio',
+            'location'
+        ]

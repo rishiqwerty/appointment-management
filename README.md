@@ -48,6 +48,12 @@ Note: make sure you're running this from django project directory, where manage.
 
     Here we also have the option to delete or make changes to the appointment. For past appointments there is no option for editting or deleting them.
 
+## * *New*  
+- Added Medical report, only doctor and admin can change details here, patient can only check the report.
+
+- Added Profile edit option
+
+
 ### Architecture
 - I have divided user into 3 categories, admin,patient and doctor all have different roles.
 

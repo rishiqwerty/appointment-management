@@ -93,37 +93,36 @@
             <nav>
                 <a href={% url 'get-appoint' %}>Appointments</a>
                 <a href={% url 'appoint' %}>Create appointments</a>
+                <a href={% url 'med-data' %}>Medical report</a>
             </nav>
             <p>Hi, <a href={% url 'profile-info' %}>{{user_type}}</a></p>
         </div>
         <img src="/static/images/12-layes-outline.apng" id="logo">
-        <div class="header"><h3>Appointment</h3><a id="logout" type="button" href="../logout">logout</a></div>
+        <div class="header"><h3>MedicalReport</h3><a id="logout" type="button" href="../logout">logout</a></div>
         
-        {% if not appointment %}
+        {% if not data %}
         <div>
-            <p>Sorry no appointment yet!!<a href="../appoint/"> Create one</a></p>
+            <p>Sorry no report yet!! <a href={% url "med" app %}> Create one</a></p>
         </div>
         {% else %}
-            {% for d in appointment %}
                 <div class="appointment-card">
-                    <p><b>Appointment number: </b>{{d.appointment_number}}</p>
-                    <p><b>Doctor: </b> Dr. {{d.doc_name}}</p>
-                    <p><b>Patient: </b> {{d.patient_name}}</p>
-                    <p><b>Time: </b>{{d.appointment_time}}</p>
-                    <p><b>Reason: </b>{{d.details}}</p>
-                    {% if d.update %}
+                    <p><b>Appointment number: </b>{{data.appointment_number}}</p>
+                    <p><b>Patient: </b> {{ddata.patient_name}}</p>
+                    <p><b>Prescription: </b> {{data.prescription}}</p>
+                    <p><b>Test requested: </b>{{data.test_requested}}</p>
+                    <p><b>Test result: </b>{{data.test_results}}</p>
+                    {% if data.update %}
+                    {% if user_type != 'PATIENT' %}
                         <div class="del-update">
-                            <a id="delete-update" type="button" href={% url 'delete' d.appointment_id %}>Delete</a>
-                            <a id="delete-update" type="button" href={% url 'update' d.appointment_id %}>Update</a>
-                        
+                            <a id="delete-update" type="button" href={% url 'med' data.app_id %}>Update</a>
+                        </div>
+                        {% endif %}
                     {% else %}
                     <div class="del-update">
                         <p>Past</p>
-                        {% endif %}
-                        <a id="delete-update" type="button" href={% url 'med-info' d.appointment_id %}>Check Report</a>
                     </div>
+                    {% endif %}
                 </div>  
-            {% endfor %}
 
         {% endif %}
     </div>

@@ -97,20 +97,20 @@
             <nav>
                 <a href={% url 'get-appoint' %}>Appointments</a>
                 <a href={% url 'appoint' %}>Create appointments</a>
+                <a href={% url 'med-data' %}>Medical report</a>
             </nav>
             <p>Hi, <a href={% url 'profile-info' %}>{{user_type}}</a></p>
         </div>
         <img src="/static/images/12-layes-outline.apng" id="logo">
-        <div class="header"><h3>Book an appointment</h3><a id="logout" type="button" href="../logout">logout</a></div>
+        <div class="header"><h3>Profile</h3><a id="logout" type="button" href="../logout">logout</a></div>
         
         <div class="appointment-form">
             
         
-            <form action="{% url 'appoint' %}" method="post">
+            <form action="{% url 'profile' %}" method="post">
                 {% csrf_token %}
                 {{form}}
-                <span>{{ error }}</span>
-                <p><input type="submit" value="Create appointment" id="submit"></p>
+                <p><input type="submit" value="Save" id="submit"></p>
                 <p>Create new account?<a href="../register/">  Sign up</a></p>
                 
             </form>

@@ -33,13 +33,27 @@
         background-color: #ffffff;
         border-radius: 1.3rem;
     }
+    .header{
+        display: flex;
+        justify-content: space-between;
+        column-gap: 5vw;
+    }
+    .auth{
+        display: flex;
+        column-gap: 2rem;
+        background-color: #ffffff;
+        border-radius: 1.5rem;
+    }
+
 </style>
 {% block content %}
+
     <div>
         <div class='logout'>
             <img src="/static/images/12-layes-outline.apng" id="logo">
             <p>{{html}}</p>
-            <a href={{url}}>Signup</a>
+            <div class="auth"><a href={{url}}>Signup</a>
+            <a id="logout" type="button" href="../logout">logout</a></div>
         </div>
     </div>
 {% endblock %}

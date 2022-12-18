@@ -4,9 +4,11 @@ from django.contrib.auth import login, authenticate
 from django.shortcuts import render, redirect
 from appointment.models import Doctor
 from django.contrib.auth.models import User
-from appointment.forms import AppointmentForm, AppointmentAdminForm
-from appointment.forms import SignUpForm, LoginForm
-from appointment.models import UserData, Appointment, Patient
+import sys
+if 'makemigrations' not in sys.argv and 'migrate' not in sys.argv:
+    from appointment.forms import AppointmentForm, AppointmentAdminForm, MedicalReportForm, DoctorForm, UserForm
+    from appointment.forms import SignUpForm, LoginForm
+from appointment.models import UserData, Appointment, Patient, MedicalReport
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import get_object_or_404
@@ -96,7 +98,7 @@ def appointment_creation(request):
             cd = form.cleaned_data
             date = cd['appointment_date']
             time = cd['appointment_time']
-            doc = User.objects.get(id=cd['doctorID'])
+            doc = cd['doctorID']
             cause = cd['reason']
 
             date_numb = date.split('-')
@@ -130,6 +132,12 @@ def appointment_creation(request):
                     patientID=user
                 )
                 model.save()
+                model2 = MedicalReport(
+                    appointment = model,
+                    patient = user_data,
+
+                )
+                model2.save()
                 print(user)
                 # user.refresh_from_db()  # load the profile instance created by the signal
                 user_type = form.cleaned_data.get('user_type')
@@ -174,7 +182,7 @@ def display_appointments(request):
             appointment['details'] = i.reason
             appointment['appointment_number'] = i.appointment_number
             appointment['appointment_id'] = i.id
-            appointment['update'] = i.appointment_date > today_date and i.appointment_time.hour > hour + 2
+            appointment['update'] = i.appointment_date > today_date or i.appointment_time.hour > hour + 2
             appointments.append(appointment)
         print(appointments)
     else:
@@ -196,10 +204,10 @@ def update_appointment(request, id):
         appointment = Appointment.objects.get(pk=id)
     obj = get_object_or_404(Appointment, pk=id)
     if request.method == 'POST':
-        form = AppointmentForm(request.POST, instance=request.user)
+        form = AppointmentForm(request.POST, instance=obj)
         if form.is_valid():
             cd = form.cleaned_data
-            doc = User.objects.get(id=cd['doctorID'])
+            doc = cd['doctorID']
             if Appointment.objects.filter(appointment_number=appointment.appointment_number).exists():
                 today = datetime.strptime(cd.get('appointment_date'), '%Y-%m-%d')
                 d = today.day
@@ -218,6 +226,7 @@ def update_appointment(request, id):
                     appointment.appointment_time = cd['appointment_time']
                     appointment.reason = cd['reason']
                     appointment.doctorID = doc
+                    appointment.modification_date = datetime.now()
                     appointment.save()
                     return redirect('get-appoint')
                 else:
@@ -251,3 +260,155 @@ def appointment_delete(request, id):
 def user_logout(request):
     logout(request)
     return render(request, "login.html")
+
+def create_medical_report(request, id):
+    errors = ''
+    user = User.objects.get(id=request.user.id)
+    form = MedicalReportForm(request.POST, instance=request.user)
+    appointment = Appointment.objects.get(pk=id)
+    model = MedicalReport.objects.get(appointment=id)
+    if user.is_superuser:
+        user_type = 'ADMIN'
+    else:
+        user_data = UserData.objects.get(user=user.id)
+        user_type = user_data.user_type
+    if user_type == 'PATIENT':
+        return render(request, 'logout_disabled.html',{'html':"Hey, you cant create the Report", 'url':'../register'})
+    if appointment.doctorID != user:
+        return render(request, 'logout_disabled.html',{'html':"Hey, you cant create the Report for this appointment", 'url':'../register'})
+    if request.method == "POST":
+        if form.is_valid():
+            cd = form.cleaned_data
+            model.prescription = cd.get('prescription')
+            model.test_requested = cd.get('test_requested')
+            model.test_results = cd.get('test_results')
+            model.modification_date = datetime.now()
+            print(model)
+            model.save()
+
+            return redirect('med-data')
+    else:
+        form = MedicalReportForm(instance=model)
+    
+    return render(request, "medical.html", {"form": form, 'app': appointment, 'error': errors, 'user_type': user_type})
+
+def med_data(request):
+    if request.user.is_authenticated:
+        user = User.objects.get(id=request.user.id)
+        if user.is_superuser:
+            user_type = 'ADMIN'
+        else:
+            user_data = UserData.objects.get(user=user.id)
+            user_type = user_data.user_type
+        reports = []
+        if user_type == 'ADMIN':
+            query = MedicalReport.objects.all()
+        else:
+            if user_type == 'DOCTOR':
+                appoint = Appointment.objects.filter(doctorID=user.id)
+            else:
+                appoint = Appointment.objects.filter(patientID=user.id)
+            query = MedicalReport.objects.filter(appointment__in=appoint)
+        
+        today_date = datetime.today().date()
+        hour = datetime.today().hour
+        for i in query:
+            rep = {}
+            rep['patient_name'] = i.patient.name
+            rep['app_id'] = i.appointment.id
+            rep['appointment_number'] = i.appointment.appointment_number
+            rep['prescription'] = i.prescription
+            rep['test_requested'] = i.test_requested
+            rep['test_results'] = i.test_results
+            rep['update'] = i.appointment.appointment_date > today_date or i.appointment.appointment_time.hour > hour + 2
+            reports.append(rep)
+        print(reports)
+    else:
+        print('auth plz')
+    return render(request, 'med_report.html', {'rep':reports, 'user_type': user_type})
+
+def profile_edit(request):
+    if request.user.is_authenticated:
+        user = User.objects.get(id=request.user.id)
+        user_data = UserData.objects.get(user=user.id)
+        user_type = user_data.user_type
+        if user_type == 'DOCTOR':
+            form = DoctorForm()
+            model = Doctor()
+        elif user_type == 'PATIENT':
+            form = UserForm()
+            model = Patient()
+        else:
+            return render(request, 'logout_disabled.html',{'html':"Not needed for ADMIN, Create new account?", 'url':'../register'})
+
+        if request.method == "POST":
+            if form.is_valid():
+                cd = form.cleaned_data
+                user_data.location = cd.get('location')
+                user_data.save()
+                if user_type == 'DOCTOR':
+                    model.specialist = cd.get('specialist')
+                    model.experience = cd.get('experience')
+                    model.bio = cd.get('bio')
+                else:
+                    model.specialist = cd.get('age')
+                    model.experience = cd.get('blood_group')
+                model.save()
+
+            return redirect('profile-info')
+        else:
+            form = DoctorForm() if user_type=='DOCTOR' else UserForm()
+    
+    return render(request, 'profile_edit.html', {'form':form, 'user_type': user_type})
+
+
+
+def profile_info(request):
+    if request.user.is_authenticated:
+        user = User.objects.get(id=request.user.id)
+        user_data = UserData.objects.get(user=user.id)
+        user_type = user_data.user_type
+        data = {}
+
+        data['name'] = user.first_name + ' ' + user.last_name
+        if user_type == 'DOCTOR':
+            doc = Doctor.objects.get(user_data=user_data)
+            data['specialist'] = doc.specialist
+            data['experience'] = doc.experience
+            data['bio'] = doc.bio
+        
+        elif user_type == 'PATIENT':
+            pat = Patient.objects.get(user_data=user_data)
+            data['age'] = pat.age
+            data['blood_group'] = pat.blood_group
+            data['past_medical_report'] = pat.past_medical_report
+        
+        print(user_type)
+    
+    return render(request, 'profile_info.html', {'data':data, 'user_type': user_type})
+
+def med_per_info(request, id):
+    if request.user.is_authenticated:
+        user = User.objects.get(id=request.user.id)
+        user_data = UserData.objects.get(user=user.id)
+        user_type = user_data.user_type
+        query = MedicalReport.objects.filter(appointment=id)
+        
+        today_date = datetime.today().date()
+        hour = datetime.today().hour
+        if query:
+            for i in query:
+                rep = {}
+                rep['patient_name'] = i.patient.name
+                rep['app_id'] = i.appointment.id
+                rep['appointment_number'] = i.appointment.appointment_number
+                rep['prescription'] = i.prescription
+                rep['test_requested'] = i.test_requested
+                rep['test_results'] = i.test_results
+                rep['update'] = i.appointment.appointment_date > today_date or i.appointment.appointment_time.hour > hour + 2
+            print(rep)
+        else:
+            return render(request, 'logout_disabled.html',{'html':"Not needed for ADMIN, Create new account?", 'url':'../register'})
+
+    return render(request, 'med_per_info.html', {'data':rep, 'app':id, 'user_type': user_type})
+        

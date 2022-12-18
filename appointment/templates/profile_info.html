@@ -7,6 +7,12 @@
         width:5vw;
         align-self: center;
     }
+    #avatar{
+        width: 12vw;
+        align-self: center;
+        background-color: #ffe27b;
+        border-radius: 50%;
+    }
     a{
         text-decoration: none;
         color: orange;
@@ -28,7 +34,17 @@
         background-color: #f2921d;
         color: white;
         border-radius: 1.5rem;
-    } 
+    }
+    #edit{
+        padding: 1.2vh 1vw;
+        margin: 1vh 0;
+        display: flex;
+        width: 80px;
+        align-items: center;
+        background-color: #f2921d;
+        color: white;
+        border-radius: 1.5rem;
+    }
     .appointment-content{
         display: flex;
         flex-direction: column;
@@ -85,6 +101,10 @@
         column-gap: 10px;
         align-items: center;
     }
+    .prof{
+        display: flex;
+        justify-content: space-between;
+    }
 </style>
 {% block content %}
 {% if request.user.is_authenticated %}
@@ -93,39 +113,37 @@
             <nav>
                 <a href={% url 'get-appoint' %}>Appointments</a>
                 <a href={% url 'appoint' %}>Create appointments</a>
+                <a href={% url 'med-data' %}>Medical report</a>
             </nav>
             <p>Hi, <a href={% url 'profile-info' %}>{{user_type}}</a></p>
         </div>
         <img src="/static/images/12-layes-outline.apng" id="logo">
-        <div class="header"><h3>Appointment</h3><a id="logout" type="button" href="../logout">logout</a></div>
-        
-        {% if not appointment %}
-        <div>
-            <p>Sorry no appointment yet!!<a href="../appoint/"> Create one</a></p>
-        </div>
-        {% else %}
-            {% for d in appointment %}
-                <div class="appointment-card">
-                    <p><b>Appointment number: </b>{{d.appointment_number}}</p>
-                    <p><b>Doctor: </b> Dr. {{d.doc_name}}</p>
-                    <p><b>Patient: </b> {{d.patient_name}}</p>
-                    <p><b>Time: </b>{{d.appointment_time}}</p>
-                    <p><b>Reason: </b>{{d.details}}</p>
-                    {% if d.update %}
-                        <div class="del-update">
-                            <a id="delete-update" type="button" href={% url 'delete' d.appointment_id %}>Delete</a>
-                            <a id="delete-update" type="button" href={% url 'update' d.appointment_id %}>Update</a>
-                        
-                    {% else %}
-                    <div class="del-update">
-                        <p>Past</p>
-                        {% endif %}
-                        <a id="delete-update" type="button" href={% url 'med-info' d.appointment_id %}>Check Report</a>
+        <div class="header"><h3>Profile</h3><a id="logout" type="button" href="../logout">logout</a></div>
+        <div class="appointment-card">
+            <div class="prof">
+                <div>
+                    <p><b>Name: </b>{{data.name}}</p>
+                    {% if user_type == 'DOCTOR' %}
+                        <p><b>Speciality: </b> {{data.specialist}}</p>
+                        <p><b>Bio: </b> {{data.bio}}</p>
+                        <p><b>Experience: </b> {{data.experience}}</p>
+                        <a id="edit" type="button" href={% url 'profile' %}>Edit Profile</a>
                     </div>
-                </div>  
-            {% endfor %}
-
-        {% endif %}
+                    <img src="/static/images/doc.apng" id="avatar">
+                        {% elif user_type == 'PATIENT' %}
+                        <p><b>Age: </b>{{data.age}}</p>
+                        <p><b>BloodGroup: </b>{{data.blood_group}}</p>
+                        <p><b>Last Medical Report:</b> {{ data.past_medical_report }}</p>
+                        <a id="edit" type="button" href={% url 'profile' %}>Edit Profile</a>
+                    </div>
+                    <img src="/static/images/avatar.apng" id="avatar">
+                    {% else %}
+                    </div>
+                    <img src="/static/images/admin.apng" id="avatar">
+                    {% endif %}
+                    
+            </div>
+        </div>  
     </div>
 {% endif %}
 {% endblock %}
